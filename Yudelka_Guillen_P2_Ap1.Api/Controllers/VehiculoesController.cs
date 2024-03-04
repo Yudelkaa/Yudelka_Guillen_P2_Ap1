@@ -20,19 +20,21 @@ namespace Yudelka_Guillen_P2_Ap1.Api.Controllers
         {
             _context = context;
         }
+        [HttpGet]
 
         // GET: api/Vehiculoes
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Vehiculo>>> GetVehiculo()
         {
-            return await _context.Vehiculo.ToListAsync();
+            return await _context.Vehiculo.Include(op => op.VehiculoId).ToListAsync();
         }
 
         // GET: api/Vehiculoes/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Vehiculo>> GetVehiculo(int id)
         {
-            var vehiculo = await _context.Vehiculo.FindAsync(id);
+
+            var vehiculo = await _context.Vehiculo.Include(t => t.VehiculoDetalle).Where(t => t.VehiculoId == id).FirstOrDefaultAsync();
 
             if (vehiculo == null)
             {
@@ -78,6 +80,14 @@ namespace Yudelka_Guillen_P2_Ap1.Api.Controllers
         [HttpPost]
         public async Task<ActionResult<Vehiculo>> PostVehiculo(Vehiculo vehiculo)
         {
+            if (!VehiculoExists(vehiculo.VehiculoId))
+                _context.Vehiculo.Add(vehiculo);
+            else
+                _context.Vehiculo.Update(vehiculo);
+            await _context.SaveChangesAsync();
+            return Ok(vehiculo);
+
+
             _context.Vehiculo.Add(vehiculo);
             await _context.SaveChangesAsync();
 
@@ -104,5 +114,8 @@ namespace Yudelka_Guillen_P2_Ap1.Api.Controllers
         {
             return _context.Vehiculo.Any(e => e.VehiculoId == id);
         }
+
     }
+
 }
+
