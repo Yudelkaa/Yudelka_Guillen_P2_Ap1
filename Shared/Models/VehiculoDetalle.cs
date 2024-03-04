@@ -17,7 +17,7 @@ namespace Shared.Models
 		public int AccesorioId { get; set; }
 		[Required(ErrorMessage = "Es requerido")]
 		public double Valor { get; set; }
-
+	
 	}
 	
 }
