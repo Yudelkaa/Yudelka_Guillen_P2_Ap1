@@ -1,7 +1,72 @@
 ﻿@page "/Delete"
+@page "/Delete/{VehiculoId:int}"
+@using Shared.Models
+@inject HttpClient httpClient
 
-<h3>Delete</h3>
+<PageTitle>Eliminar Vehiculo</PageTitle>
+<div class="container">
+    <div class="card shadow-lg">
+        <div class="card-header text-center">
+            <h2>Eliminar</h2>
+        </div>
+
+        <div class="card-body">
+            <h3 class="text-danger text-center">¿Seguro que quiere eliminar?</h3>
+            <ul>
+                <li>Vehiculo Id: @vehiculo.VehiculoId</li>
+                <li>Fecha: @vehiculo.Fecha</li>
+                <li>Descricpi&oacute;n: @vehiculo.Descripcion</li>
+                <li>Fecha: @vehiculo.Fecha</li>
+                <li>Costo: @vehiculo.Costo</li>
+                <li>Gasto: @vehiculo.Gastos</li>
+            </ul>
+        </div>
+        <div class="card-footer text-center">
+            <div class="input-group">
+                <button class="btn btn-danger" @onclick="Eliminar">S&iacute;</button>
+                <a href="/Index" class="btn btn-warning">Volver</a>
+            </div>
+        </div>
+    </div>
+</div>
 
 @code {
+    [Parameter]
+    public int VehiculoId { get; set; }
+    public Vehiculo vehiculo { get; set; } = new Vehiculo();
 
+    protected override async Task OnInitializedAsync()
+    {
+        if (VehiculoId > 0)
+        {
+            vehiculo.VehiculoId = VehiculoId;
+            await Buscar();
+        }
+    }
+
+    public async Task Buscar()
+    {
+        var response = await httpClient.GetAsync($"api/Vehiculo/{vehiculo.VehiculoId}");
+        if (response.IsSuccessStatusCode)
+        {
+            vehiculo = await response.Content.ReadFromJsonAsync<Vehiculo>();
+        }
+        else
+        {
+            vehiculo = null;
+        }
+    }
+
+    public async Task Eliminar()
+    {
+        var response = await httpClient.DeleteAsync($"api/Vehiculo/{vehiculo.VehiculoId}");
+        if (response.IsSuccessStatusCode)
+        {
+            vehiculo = new Vehiculo();
+        }
+        else
+        {
+            vehiculo = null;
+        }
+    }
 }
