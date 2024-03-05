@@ -86,12 +86,6 @@ namespace Yudelka_Guillen_P2_Ap1.Api.Controllers
                 _context.Vehiculo.Update(vehiculo);
             await _context.SaveChangesAsync();
             return Ok(vehiculo);
-
-
-            _context.Vehiculo.Add(vehiculo);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetVehiculo", new { id = vehiculo.VehiculoId }, vehiculo);
         }
 
         // DELETE: api/Vehiculoes/5

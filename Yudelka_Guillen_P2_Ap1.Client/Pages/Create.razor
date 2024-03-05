@@ -1,6 +1,139 @@
 ﻿@page "/Create"
-<h3>Create</h3>
+@using Shared.Models
+@inject HttpClient httpClient
+
+
+<PageTitle>Registro Vehiculo</PageTitle>
+<EditForm Model="vehiculo" OnValidSubmit="Guardar" FormName="vehiculo">
+	<DataAnnotationsValidator />
+
+	<div class="container">
+		<div class="card shadow-lg">
+			<div class="card-header" style="color: white; background-color: royalblue;">
+				<NavLink class="btn btn-light float-end" href="Details">Consultar Vehiculos</NavLink>
+				<h1><strong>Crear Vehiculo</strong></h1>
+			</div>
+			<div class="card-body">
+
+				<div class="col-xs-8 col-sm-12 col-md-8 col-lg-3 col-xl-2.5">
+					<label><strong>Vehiculo ID:</strong></label>
+					<div class="input-group mb-3">
+						<InputNumber @bind-Value="vehiculo.VehiculoId" class="form-control" aria-describedby="BotonBuscar" />
+						<button @onclick="Buscar" class="btn btn-primary bi bi-search-heart" type="button" id="BotonBuscar"></button>
+					</div>
+				</div>
+
+				<div class="row">
+					<div class="col-xs-12 col-sm-12 col-md-8 col-lg-6 col-xl-4">
+						<label class="form-label" for="inputFecha"><strong>Fecha:</strong></label>
+						<InputDate @bind-Value="vehiculo.Fecha" class="form-control" />
+						<ValidationMessage For="@(() => vehiculo.Fecha)" />
+					</div>
+
+					<div>
+						<label class="form-label fw-bold"><span class="bi bi-chat-heart-fill" /> Gastos:</label>
+						<InputNumber @bind-Value="vehiculo.Gastos" class="form-control"></InputNumber>
+						<ValidationMessage For="@(() => vehiculo.Gastos)" />
+					</div>
+				</div>
+			</div>
+			<div class="card-footer justify-content-center d-flex">
+				<div>
+					<button type="submit" class="btn btn-primary bi bi-floppy">
+						Guardar<i class="oi oi-document" />
+					</button>
+				</div>
+			</div>
+		</div>
+		<div class="my-4"></div>
+
+		@*Vehiculo detalle*@
+		<div class="card shadow-lg">
+
+			<div class="card-header" style="color: white; background-color: royalblue;">
+				<h1 class="fw-bold">Detalle Vehiculo</h1>
+			</div>
+			<div class="card-body">
+				<div>
+					<label class="form-label fw-bold">Id:</label>
+					<InputNumber @bind-Value="Detalle.Id" class="form-control"</InputNumber>
+					<ValidationMessage For="@(() => Detalle.Id)" />
+				</div>
+				<div>
+					<label class="form-label fw-bold"> Vehiculo Id:</label>
+					<InputTextArea @bind-Value="Detalle.VehiculoId" class="form-control"></InputTextArea>
+					<ValidationMessage For="@(() => Detalle.VehiculoId)" />
+				</div>
+			</div>
+			<div class="card-footer d-flex justify-content-center">
+				<button type="button" class="btn btn-success bi bi-plus-square-fill" @onclick="AddDetalle"> Agregar</button>
+			</div>
+			<table class='table table-sm justify-content-center'>
+				<thead>
+					<tr>
+						<th>VehiculoId</th>
+						<th></th>
+						<th></th>
+						<th></th>
+						<th></th>
+					</tr>
+				</thead>
+				<tbody>
+					@foreach (var detalle in vehiculo.VehiculoDetalle)
+					{
+						var ticketEncontrado = BuscarVehiculo(detalle.VehiculoId);
+						<tr>
+							<td>@detalle.VehiculoId</td>
+							<td>@detalle.</td>
+							<td>@detalle.</td>
+							<td><button type="button" class="btn btn-danger bi bi-trash" @onclick=@(() => RemoverDetalle(detalle))></button></td>
+						</tr>
+					}
+				</tbody>
+			</table>
+		</div>
+	</div>
+</EditForm>
 
 @code {
 
+	[Parameter]
+	public int VehiculoId { get; set; }
+	List<Vehiculo> listaSolicitado = new List<Vehiculo>();
+	public List<VehiculoDetalle> ListaDetalles = new List<VehiculoDetalle>();
+	public Vehiculo vehiculo { get; set; } = new Vehiculo();
+	public VehiculoDetalle Detalle { get; set; } = new VehiculoDetalle();
+
+	public bool mensajeVacio;
+	public int resultado;
+	public bool emisorVacio;
+
+	protected override async Task OnInitializedAsync()
+	{
+		if (VehiculoId > 0)
+		{
+			this.vehiculo.VehiculoId = VehiculoId;
+			await Buscar();
+		}
+	}
+
+
+	public async Task Buscar()
+	{
+	var vehiculoIdEncontrado = (await httpClient.GetFromJsonAsync<List<Vehiculo>>($"api/Vehiculo"))!
+	.ToList()
+	.Any(v => v.VehiculoId == vehiculo.VehiculoId);
+	if (vehiculoIdEncontrado)
+	{
+		var vehiculoEncontrado = await httpClient.GetFromJsonAsync<Vehiculo>($"api/Vehiculo/{vehiculo.VehiculoId}");
+		if (vehiculoEncontrado != null)
+		{
+			this.vehiculo = vehiculoEncontrado;
+			StateHasChanged();
+		}
+	}
+	else
+	{
+		return;
+	}
 }

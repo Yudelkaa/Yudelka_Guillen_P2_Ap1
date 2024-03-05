@@ -13,7 +13,7 @@ namespace Shared.Models
 
 		public int Id { get; set; }
 		[ForeignKey("Vehiculo")]
-		public int VehicukoId { get; set; }
+		public int VehiculoId { get; set; }
 		public int AccesorioId { get; set; }
 		[Required(ErrorMessage = "Es requerido")]
 		public double Valor { get; set; }
