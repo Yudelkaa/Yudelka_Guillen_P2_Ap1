@@ -1,7 +1,84 @@
 ﻿@page "/Edit"
+@page "/Edit/VehiculoId={vehiculoId:int}"
+@inject NavigationManager NavigationManager
+@using Shared.Models
+@inject HttpClient httpClient
 
-<h3>Edit</h3>
+<PageTitle>Editar Vehiculo</PageTitle>
+<EditForm Model="vehiculo" OnValidSubmit="Modificar">
+    <DataAnnotationsValidator />
+    <div class="container">
+        <div class="card shadow-lg">
+            @*Header*@
+            <div class="card-header">
+                <h3><strong>Editar Vehiculo</strong></h3>
+            </div>
+            @*Body*@
+            <div class="card-body">
+                <div class="col-xs-12 col-sm-12 col-md-8 col-lg-6 col-xl-4"></div>
+                @*Id*@
+                <div class="mb-3">
+                    <div class="col-4">
+                        <label class="form-label" for="vehiculoId"><strong>Id:</strong></label>
+                        <div class="input-group">
+                            <InputNumber id="vehiculoId" class="form-control" @bind-Value="vehiculo.VehiculoId"></InputNumber>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            @*Boton*@
+            <div class="card-footer d-flex justify-content-center">
+                <div class="px-2">
+                    <button type="button" class="btn btn-primary" @onclick="Detalle">Volver</button>
+                </div>
+                <button type="submit" class="btn btn-success">
+                    <i class="bi bi-floppy-fill" /> Modificar
+                </button>
+            </div>
+        </div>
+    </div>
+    @mensaje
+</EditForm>
 
 @code {
+    [Parameter]
+    public Vehiculo vehiculo { get; set; } = new Vehiculo();
+    public string mensaje = "";
 
+    protected override async Task OnInitializedAsync()
+    {
+        await Task.Delay(500);
+
+        if (vehiculo.VehiculoId > 0)
+            vehiculo = await httpClient.GetFromJsonAsync<Vehiculo>($"api/Vehiculo/{vehiculo.VehiculoId}");
+    }
+
+    public async Task Modificar()
+    {
+        if (await Validar())
+            mensaje = "Error, ya existe un vehiculo con este ID";
+        else
+        {
+            var response = await httpClient.PutAsJsonAsync($"api/Vehiculo/{vehiculo.VehiculoId}", vehiculo);
+            if (response.IsSuccessStatusCode)
+            {
+                mensaje = "Modificación hecha correctamente";
+                await Task.Delay(2000);
+                Detalle();
+            }
+            else
+                mensaje = "Error";
+        }
+    }
+
+    void Detalle()
+    {
+        NavigationManager.NavigateTo("/Details");
+    }
+
+    public async Task<bool> Validar()
+    {
+        var response = await httpClient.GetAsync($"api/Vehiculo/{vehiculo.VehiculoId}");
+        return response.IsSuccessStatusCode;
+    }
 }
