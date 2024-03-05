@@ -1,6 +1,97 @@
 ﻿@page "/Details"
-<h3>Details</h3>
+@using Shared.Models
+@inject HttpClient httpClient
+
+<PageTitle>Detalle de Vehiculos</PageTitle>
+<EditForm Model="vehiculo" OnValidSubmit="Guardar">
+	<div class="container">
+		<div class="card shadow-lg">
+			<div class="card-header alert-secondary" style="color: white; background-color: royalblue;">
+				<NavLink class="btn btn-light float-end" href="/Create">Registrar Vehiculos</NavLink>
+				<h1><strong>Consultas Vehiculos</strong></h1>
+			</div>
+
+			<table class="table table-striped table-bordered justify-content">
+				<thead>
+					<tr class="text-center">
+						<th>VehiculoId</th>
+						<th>Descripci&oacute;n</th>
+						<th>Fecha</th>
+						<th>Costo:</th>
+						<th>Gastos</th>
+						<th>Eliminar</th>
+
+					</tr>
+				</thead>
+				<tbody>
+					@foreach (var vehiculo in TicketsList)
+					{
+						<tr class="text-center">
+							<td>@vehiculo.VehiculoId</td>
+							<td>@vehiculo.Descripcion</td>
+							<td>@vehiculo.Fecha</td>
+							<td>@vehiculo.Costo</td>
+							<td>@vehiculo.Gastos</td>
+							<td><button class="btn btn-danger bi bi-trash" @onclick="() => Eliminar()"></button></td>
+
+						</tr>
+					}
+				</tbody>
+			</table>
+		</div>
+		<div>@mensaje</div>
+	</div>
+</EditForm>
 
 @code {
+	public Vehiculo? vehiculo { get; set; } = new Vehiculo();
+	public string mensaje = "";
+	public int? vehiculoEditando = null;
 
+	public int Filtro { get; set; }
+	public List<Vehiculo> TicketsList = new List<Vehiculo>();
+	public int cuenta { get; set; }
+
+	public DateTime Desde { get; set; }
+	public DateTime Hasta { get; set; }
+
+
+	protected override async Task OnInitializedAsync()
+	{
+		Desde = DateTime.Now.AddMonths(-1);
+		Hasta = DateTime.Now;
+	}
+
+	public async Task Guardar()
+	{
+		using var response = await httpClient.PostAsJsonAsync("api/Vehiculo", vehiculo);
+		if (!response.IsSuccessStatusCode)
+		{
+			return;
+		}
+		var vehiculoDevuelto = await response.Content.ReadFromJsonAsync<Vehiculo>();
+		if (vehiculoDevuelto is not null)
+		{
+			vehiculo = vehiculoDevuelto;
+			StateHasChanged();
+			this.Nuevo();
+		}
+	}
+
+	void Nuevo()
+	{
+		this.vehiculo = new Vehiculo();
+		mensaje = string.Empty;
+	}
+
+	public async Task Eliminar()
+	{
+		using var response = await httpClient.DeleteAsync($"api/Vehiculo/{vehiculo?.VehiculoId}");
+		if (!response.IsSuccessStatusCode)
+		{
+			return;
+		}
+
+		Nuevo();
+	}
 }
