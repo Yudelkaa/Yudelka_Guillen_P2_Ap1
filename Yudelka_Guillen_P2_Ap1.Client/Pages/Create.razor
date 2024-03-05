@@ -33,7 +33,6 @@
 							<InputText @bind-Value="vehiculo.Descripcion" class="form-control" />
 							<ValidationMessage For="@(() => vehiculo.Descripcion)" />
 						</div>
-
 					</div>
 				</div>
 
@@ -51,56 +50,62 @@
 					</div>
 				</div>
 				<br />
+
+
+				@*Vehiculo detalle*@
+				<fieldset class="border-primmary border border-2">
+
+					<div class="card-body col-3">
+						<h3 class="fw-bold">Detalle Vehiculo</h3>
+						<div>
+							<label class="form-label fw-bold">Accesorios Id:</label>
+							<InputSelect @bind-Value="Detalle.AccesorioId" class="form-select">
+								<option value="">Seleccione el accesorio</option>
+								@foreach (var detalle in ListaAccesorios)
+								{
+									<option value="@detalle.AccesoriosId">@detalle.Descripcion</option>
+								}
+							</InputSelect>
+							<ValidationMessage For="@(() => Detalle.AccesorioId)" />
+
+							<label class="form-label fw-bold"> Valor:</label>
+							<InputNumber @bind-Value="Detalle.Valor" class="form-control"></InputNumber>
+							<ValidationMessage For="@(() => Detalle.Valor)" />
+						</div>
+					</div>
+
+					<div class="card-footer d-flex justify-content-center">
+						<button type="button" class="btn btn-success bi bi-plus-square-fill" @onclick="AddDetalle"> Agregar</button>
+						<button type="submit" class="btn btn-primary bi bi-floppy">Guardar<i class="oi oi-document" /></button>
+					</div>
+					<table class='table table-sm justify-content-center'>
+						<thead>
+							<tr>
+								<th>Vehiculo Id</th>
+								<th>Accesorios Id</th>
+								<th>Valor</th>
+								<th>Eliminar</th>
+							</tr>
+						</thead>
+						<tbody>
+							@foreach (var detalle in vehiculo.VehiculoDetalle)
+							{
+								var ticketEncontrado = BuscarVehiculo(detalle.VehiculoId);
+								<tr>
+									<td>@detalle.VehiculoId</td>
+									<td>@detalle.AccesorioId</td>
+									<td>@detalle.Valor</td>
+									<td><button type="button" class="btn btn-danger bi bi-trash" @onclick=@(() => RemoverDetalle(detalle))></button></td>
+								</tr>
+							}
+						</tbody>
+					</table>
+
+				</fieldset>
 			</div>
 		</div>
 	</div>
 
-	@*Vehiculo detalle*@
-	<div class="card shadow-lg">
-
-		<div class="card-header" style="color: white; background-color: royalblue;">
-			<h1 class="fw-bold">Detalle Vehiculo</h1>
-		</div>
-		<div class="card-body col-3">
-			<div>
-				<label class="form-label fw-bold">Accesorios Id:</label>
-				<InputNumber @bind-Value="Detalle.AccesorioId" class="form-control"></InputNumber>
-				<ValidationMessage For="@(() => Detalle.AccesorioId)" />
-			</div>
-			<div>
-				<label class="form-label fw-bold"> Valor:</label>
-				<InputNumber @bind-Value="Detalle.Valor" class="form-control"></InputNumber>
-				<ValidationMessage For="@(() => Detalle.Valor)" />
-			</div>
-		</div>
-		<div class="card-footer d-flex justify-content-center">
-			<button type="button" class="btn btn-success bi bi-plus-square-fill" @onclick="AddDetalle"> Agregar</button>
-			<button type="submit" class="btn btn-primary bi bi-floppy">Guardar<i class="oi oi-document" /></button>
-		</div>
-		<table class='table table-sm justify-content-center'>
-			<thead>
-				<tr>
-					<th>Vehiculo Id</th>
-					<th>Accesorios Id</th>
-					<th>Valor</th>
-					<th>Eliminar</th>
-				</tr>
-			</thead>
-			<tbody>
-				@foreach (var detalle in vehiculo.VehiculoDetalle)
-				{
-					var ticketEncontrado = BuscarVehiculo(detalle.VehiculoId);
-					<tr>
-						<td>@detalle.VehiculoId</td>
-						<td>@detalle.AccesorioId</td>
-						<td>@detalle.Valor</td>
-						<td><button type="button" class="btn btn-danger bi bi-trash" @onclick=@(() => RemoverDetalle(detalle))></button></td>
-					</tr>
-				}
-			</tbody>
-		</table>
-	</div>
-	</div>
 </EditForm>
 
 @code {
@@ -109,6 +114,7 @@
 	public int VehiculoId { get; set; }
 	List<Vehiculo> listaSolicitado = new List<Vehiculo>();
 	public List<VehiculoDetalle> ListaDetalles = new List<VehiculoDetalle>();
+	public List<Accesorios> ListaAccesorios = new List<Accesorios>();
 	public Vehiculo vehiculo { get; set; } = new Vehiculo();
 	public VehiculoDetalle Detalle { get; set; } = new VehiculoDetalle();
 
@@ -118,6 +124,7 @@
 
 	protected override async Task OnInitializedAsync()
 	{
+		ListaAccesorios = await httpClient.GetFromJsonAsync<List<Accesorios>>("api/Accesorios");
 		if (VehiculoId > 0)
 		{
 			this.vehiculo.VehiculoId = VehiculoId;
