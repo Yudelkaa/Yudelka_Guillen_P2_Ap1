@@ -26,7 +26,7 @@ namespace Yudelka_Guillen_P2_Ap1.Api.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Vehiculo>>> GetVehiculo()
         {
-            return await _context.Vehiculo.Include(op => op.VehiculoId).ToListAsync();
+            return await _context.Vehiculo.Include(op => op.VehiculoDetalle).ToListAsync();
         }
 
         // GET: api/Vehiculoes/5
