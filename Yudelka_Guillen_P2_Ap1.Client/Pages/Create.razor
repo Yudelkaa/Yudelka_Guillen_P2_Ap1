@@ -42,12 +42,11 @@
 						<InputNumber @bind-Value="vehiculo.Costo" class="form-control"></InputNumber>
 						<ValidationMessage For="@(() => vehiculo.Costo)" />
 					</div>
-
 					<div class="col-3">
 						<label class="form-label fw-bold"> Gastos:</label>
-						<InputNumber @bind-Value="vehiculo.Gastos" class="form-control"></InputNumber>
-						<ValidationMessage For="@(() => vehiculo.Gastos)" />
+						<input class="form-control" readonly />
 					</div>
+
 				</div>
 				<br />
 
