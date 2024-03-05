@@ -134,7 +134,7 @@
 	private async Task<Vehiculo> BuscarVehiculo(int vehiculoId)
 	{
 		Vehiculo vehiculo = new Vehiculo();
-		var vehiculoEncontrado = await httpClient.GetFromJsonAsync<Vehiculo>($"api/Vehiculo/{vehiculoId}");
+		var vehiculoEncontrado = await httpClient.GetFromJsonAsync<Vehiculo>($"api/Vehiculoes/{vehiculoId}");
 		if (vehiculoEncontrado != null)
 			return vehiculo = vehiculoEncontrado;
 		return new Vehiculo();
@@ -142,7 +142,7 @@
 
 	public async Task Guardar()
 	{
-		var response = await httpClient.PostAsJsonAsync("api/Vehiculo", vehiculo);
+		var response = await httpClient.PostAsJsonAsync("api/Vehiculoes", vehiculo);
 
 		if (!response.IsSuccessStatusCode)
 		{
@@ -153,12 +153,12 @@
 
 	public async Task Buscar()
 	{
-		var vehiculoIdEncontrado = (await httpClient.GetFromJsonAsync<List<Vehiculo>>($"api/Vehiculo"))!
+		var vehiculoIdEncontrado = (await httpClient.GetFromJsonAsync<List<Vehiculo>>($"api/Vehiculoes"))!
 		.ToList()
 		.Any(v => v.VehiculoId == vehiculo.VehiculoId);
 		if (vehiculoIdEncontrado)
 		{
-			var vehiculoEncontrado = await httpClient.GetFromJsonAsync<Vehiculo>($"api/Vehiculo/{vehiculo.VehiculoId}");
+			var vehiculoEncontrado = await httpClient.GetFromJsonAsync<Vehiculo>($"api/Vehiculoes/{vehiculo.VehiculoId}");
 			if (vehiculoEncontrado != null)
 			{
 				this.vehiculo = vehiculoEncontrado;
@@ -188,7 +188,7 @@
 			detalle = detalleEncontrado;
 			Detalle = detalleEncontrado;
 			vehiculo.VehiculoDetalle.Remove(detalle);
-			await httpClient.DeleteAsync($"api/Tickets/DeleteTicketsMessages/{detalle.Id}");
+			await httpClient.DeleteAsync($"api/Vehiculoes/{detalle.Id}");
 		}
 	}
 

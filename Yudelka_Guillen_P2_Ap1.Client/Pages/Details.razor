@@ -3,7 +3,7 @@
 @inject HttpClient httpClient
 
 <PageTitle>Detalle de Vehiculos</PageTitle>
-<EditForm Model="vehiculo" OnValidSubmit="Guardar">
+<EditForm Model="vehiculo">
 	<div class="container">
 		<div class="card shadow-lg">
 			<div class="card-header alert-secondary" style="color: white; background-color: royalblue;">
@@ -19,12 +19,11 @@
 						<th>Fecha</th>
 						<th>Costo</th>
 						<th>Gastos</th>
-						<th>Eliminar</th>
 
 					</tr>
 				</thead>
 				<tbody>
-					@foreach (var vehiculo in TicketsList)
+					@foreach (var vehiculo in ListaVehiculo)
 					{
 						<tr class="text-center">
 							<td>@vehiculo.VehiculoId</td>
@@ -32,8 +31,6 @@
 							<td>@vehiculo.Fecha</td>
 							<td>@vehiculo.Costo</td>
 							<td>@vehiculo.Gastos</td>
-							<td><button class="btn btn-danger bi bi-trash" @onclick="() => Eliminar()"></button></td>
-
 						</tr>
 					}
 				</tbody>
@@ -49,7 +46,7 @@
 	public int? vehiculoEditando = null;
 
 	public int Filtro { get; set; }
-	public List<Vehiculo> TicketsList = new List<Vehiculo>();
+	public List<Vehiculo> ListaVehiculo = new List<Vehiculo>();
 	public int cuenta { get; set; }
 
 	public DateTime Desde { get; set; }
@@ -58,25 +55,11 @@
 
 	protected override async Task OnInitializedAsync()
 	{
+		ListaVehiculo = await httpClient.GetFromJsonAsync<List<Vehiculo>>("api/Vehiculoes");
 		Desde = DateTime.Now.AddMonths(-1);
 		Hasta = DateTime.Now;
 	}
 
-	public async Task Guardar()
-	{
-		using var response = await httpClient.PostAsJsonAsync("api/Vehiculo", vehiculo);
-		if (!response.IsSuccessStatusCode)
-		{
-			return;
-		}
-		var vehiculoDevuelto = await response.Content.ReadFromJsonAsync<Vehiculo>();
-		if (vehiculoDevuelto is not null)
-		{
-			vehiculo = vehiculoDevuelto;
-			StateHasChanged();
-			this.Nuevo();
-		}
-	}
 
 	void Nuevo()
 	{
@@ -84,14 +67,4 @@
 		mensaje = string.Empty;
 	}
 
-	public async Task Eliminar()
-	{
-		using var response = await httpClient.DeleteAsync($"api/Vehiculo/{vehiculo?.VehiculoId}");
-		if (!response.IsSuccessStatusCode)
-		{
-			return;
-		}
-
-		Nuevo();
-	}
 }
