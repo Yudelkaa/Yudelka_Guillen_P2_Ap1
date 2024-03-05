@@ -16,7 +16,7 @@
 			<div class="card-body">
 
 				<div class="col-xs-8 col-sm-12 col-md-8 col-lg-3 col-xl-2.5">
-					<label><strong>Vehiculo ID:</strong></label>
+					<label><strong>Vehiculo ID:<span class="bi bi-chat-heart-fill"/></strong></label>
 					<div class="input-group mb-3">
 						<InputNumber @bind-Value="vehiculo.VehiculoId" class="form-control" aria-describedby="BotonBuscar" />
 						<button @onclick="Buscar" class="btn btn-primary bi bi-search-heart" type="button" id="BotonBuscar"></button>
@@ -30,8 +30,20 @@
 						<ValidationMessage For="@(() => vehiculo.Fecha)" />
 					</div>
 
-					<div>
-						<label class="form-label fw-bold"><span class="bi bi-chat-heart-fill" /> Gastos:</label>
+
+					<div class="col-3">
+						<label class="form-label" for="Descripcion"><strong>Descripci&oacute;n</strong></label>
+						<InputText @bind-Value="vehiculo.Descripcion" class="form-control" />
+						<ValidationMessage For="@(() => vehiculo.Descripcion)" /><br />
+					</div>
+					<div class="col-3">
+						<label class="form-label fw-bold"> Costos:</label>
+						<InputNumber @bind-Value="vehiculo.Costo" class="form-control"></InputNumber>
+						<ValidationMessage For="@(() => vehiculo.Costo)" />
+					</div>
+
+					<div class="col-3">
+						<label class="form-label fw-bold"> Gastos:</label>
 						<InputNumber @bind-Value="vehiculo.Gastos" class="form-control"></InputNumber>
 						<ValidationMessage For="@(() => vehiculo.Gastos)" />
 					</div>
@@ -39,9 +51,7 @@
 			</div>
 			<div class="card-footer justify-content-center d-flex">
 				<div>
-					<button type="submit" class="btn btn-primary bi bi-floppy">
-						Guardar<i class="oi oi-document" />
-					</button>
+					<button type="submit" class="btn btn-primary bi bi-floppy">Guardar<i class="oi oi-document" /></button>
 				</div>
 			</div>
 		</div>
@@ -54,15 +64,26 @@
 				<h1 class="fw-bold">Detalle Vehiculo</h1>
 			</div>
 			<div class="card-body">
+			
 				<div>
-					<label class="form-label fw-bold">Id:</label>
-					<InputNumber @bind-Value="Detalle.Id" class="form-control"</InputNumber>
+					<label class="form-label fw-bold"> Id:</label>
+					<InputNumber @bind-Value="Detalle.Id" class="form-control"></InputNumber>
 					<ValidationMessage For="@(() => Detalle.Id)" />
 				</div>
 				<div>
 					<label class="form-label fw-bold"> Vehiculo Id:</label>
-					<InputTextArea @bind-Value="Detalle.VehiculoId" class="form-control"></InputTextArea>
+					<InputNumber @bind-Value="Detalle.VehiculoId" class="form-control"></InputNumber>
 					<ValidationMessage For="@(() => Detalle.VehiculoId)" />
+				</div>
+				<div>
+					<label class="form-label fw-bold">Accesorios Id:</label>
+					<InputNumber @bind-Value="Detalle.AccesorioId" class="form-control"></InputNumber>
+					<ValidationMessage For="@(() => Detalle.AccesorioId)" />
+				</div>
+				<div>
+					<label class="form-label fw-bold"> Valor:</label>
+					<InputNumber @bind-Value="Detalle.Valor" class="form-control"></InputNumber>
+					<ValidationMessage For="@(() => Detalle.Valor)" />
 				</div>
 			</div>
 			<div class="card-footer d-flex justify-content-center">
@@ -71,11 +92,10 @@
 			<table class='table table-sm justify-content-center'>
 				<thead>
 					<tr>
-						<th>VehiculoId</th>
-						<th></th>
-						<th></th>
-						<th></th>
-						<th></th>
+						<th>Vehiculo Id</th>
+						<th>Accesorios Id</th>
+						<th>Valor</th>
+						<th>Eliminar</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -84,8 +104,8 @@
 						var ticketEncontrado = BuscarVehiculo(detalle.VehiculoId);
 						<tr>
 							<td>@detalle.VehiculoId</td>
-							<td>@detalle.</td>
-							<td>@detalle.</td>
+							<td>@detalle.AccesorioId</td>
+							<td>@detalle.Valor</td>
 							<td><button type="button" class="btn btn-danger bi bi-trash" @onclick=@(() => RemoverDetalle(detalle))></button></td>
 						</tr>
 					}
@@ -117,23 +137,65 @@
 		}
 	}
 
+	private async Task<Vehiculo> BuscarVehiculo(int vehiculoId)
+	{
+		Vehiculo vehiculo = new Vehiculo();
+		var vehiculoEncontrado = await httpClient.GetFromJsonAsync<Vehiculo>($"api/Vehiculo/{vehiculoId}");
+		if (vehiculoEncontrado != null)
+			return vehiculo = vehiculoEncontrado;
+		return new Vehiculo();
+	}
+
+	public async Task Guardar()
+	{
+		var response = await httpClient.PostAsJsonAsync("api/Vehiculo", vehiculo);
+
+		if (!response.IsSuccessStatusCode)
+		{
+			return;
+		}
+		vehiculo = new Vehiculo();
+	}
 
 	public async Task Buscar()
 	{
-	var vehiculoIdEncontrado = (await httpClient.GetFromJsonAsync<List<Vehiculo>>($"api/Vehiculo"))!
-	.ToList()
-	.Any(v => v.VehiculoId == vehiculo.VehiculoId);
-	if (vehiculoIdEncontrado)
-	{
-		var vehiculoEncontrado = await httpClient.GetFromJsonAsync<Vehiculo>($"api/Vehiculo/{vehiculo.VehiculoId}");
-		if (vehiculoEncontrado != null)
+		var vehiculoIdEncontrado = (await httpClient.GetFromJsonAsync<List<Vehiculo>>($"api/Vehiculo"))!
+		.ToList()
+		.Any(v => v.VehiculoId == vehiculo.VehiculoId);
+		if (vehiculoIdEncontrado)
 		{
-			this.vehiculo = vehiculoEncontrado;
-			StateHasChanged();
+			var vehiculoEncontrado = await httpClient.GetFromJsonAsync<Vehiculo>($"api/Vehiculo/{vehiculo.VehiculoId}");
+			if (vehiculoEncontrado != null)
+			{
+				this.vehiculo = vehiculoEncontrado;
+				StateHasChanged();
+			}
+		}
+		else
+		{
+			return;
 		}
 	}
-	else
+
+	public async Task AddDetalle()
 	{
-		return;
+		vehiculo.VehiculoDetalle.Add(Detalle);
+		Detalle = new VehiculoDetalle();
 	}
+
+
+	public async Task RemoverDetalle(VehiculoDetalle detalle)
+	{
+
+		var detalleEncontrado = vehiculo.VehiculoDetalle.FirstOrDefault(v => v.Id == detalle.Id);
+		if (detalleEncontrado != null)
+		{
+			var ticket = BuscarVehiculo(detalleEncontrado.VehiculoId);
+			detalle = detalleEncontrado;
+			Detalle = detalleEncontrado;
+			vehiculo.VehiculoDetalle.Remove(detalle);
+			await httpClient.DeleteAsync($"api/Tickets/DeleteTicketsMessages/{detalle.Id}");
+		}
+	}
+
 }
