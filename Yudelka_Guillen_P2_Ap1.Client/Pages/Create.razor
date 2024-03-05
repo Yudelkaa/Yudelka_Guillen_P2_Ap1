@@ -17,19 +17,19 @@
 
 				<div class="row">
 					<div class="col-4">
-						<label><strong>Vehiculo ID:</strong></label>
+						<label class="fw-bold">Vehiculo ID:</label>
 						<div class="input-group mb-3">
 							<InputNumber @bind-Value="vehiculo.VehiculoId" class="form-control" aria-describedby="BotonBuscar" />
 							<button @onclick="Buscar" class="btn btn-primary bi bi-search-heart" type="button" id="BotonBuscar"></button>
 						</div>
 						<div class="col-9">
-							<label class="form-label" for="inputFecha"><strong>Fecha:</strong></label>
+							<label class="form-label fw-bold" for="inputFecha">Fecha:</label>
 							<InputDate @bind-Value="vehiculo.Fecha" class="form-control" />
 							<ValidationMessage For="@(() => vehiculo.Fecha)" />
 						</div>
 
 						<div>
-							<label class="form-label" for="Descripcion"><strong>Descripci&oacute;n</strong></label>
+							<label class="form-label fw-bold" for="Descripcion">Descripci&oacute;n</label>
 							<InputText @bind-Value="vehiculo.Descripcion" class="form-control" />
 							<ValidationMessage For="@(() => vehiculo.Descripcion)" />
 						</div>
