@@ -10,7 +10,7 @@ namespace Shared.Models
 {
 	public class VehiculoDetalle
 	{
-
+		[Key]
 		public int Id { get; set; }
 		[ForeignKey("Vehiculo")]
 		public int VehiculoId { get; set; }

@@ -10,6 +10,7 @@ namespace Shared.Models
 {
 	public class Vehiculo
 	{
+		[Key]
 		public int VehiculoId { get; set; }
 		[Required(ErrorMessage = "Es requerido")]
 		public string? Descripcion { get; set; }
