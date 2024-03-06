@@ -74,7 +74,7 @@
 					</div>
 
 					<div class="card-footer d-flex justify-content-center">
-						<button type="button" class="btn btn-success bi bi-plus-square-fill" @onclick="AddDetalle"> Agregar</button>
+						<button type="button" class="btn btn-success bi bi-plus-square-fill" @onclick="AgregarDetalle"> Agregar</button>
 						<button type="submit" class="btn btn-primary bi bi-floppy">Guardar<i class="oi oi-document" /></button>
 					</div>
 					<table class='table table-sm justify-content-center'>
@@ -111,24 +111,23 @@
 
 	[Parameter]
 	public int VehiculoId { get; set; }
-	List<Vehiculo> listaSolicitado = new List<Vehiculo>();
+	public Vehiculo vehiculo { get; set; } = new Vehiculo();
+	public Accesorios accesorios { get; set; } = new Accesorios();
+	public VehiculoDetalle Detalle { get; set; } = new VehiculoDetalle();
 	public List<VehiculoDetalle> ListaDetalles = new List<VehiculoDetalle>();
 	public List<Accesorios> ListaAccesorios = new List<Accesorios>();
-	public Vehiculo vehiculo { get; set; } = new Vehiculo();
-	public VehiculoDetalle Detalle { get; set; } = new VehiculoDetalle();
+	public List<Vehiculo> ListaVehiculo = new List<Vehiculo>();
 
 	public bool mensajeVacio;
 	public int resultado;
-	public bool emisorVacio;
 
 	protected override async Task OnInitializedAsync()
 	{
+		vehiculo.Fecha = DateTime.Now;
+
 		ListaAccesorios = await httpClient.GetFromJsonAsync<List<Accesorios>>("api/Accesorios");
-		if (VehiculoId > 0)
-		{
-			this.vehiculo.VehiculoId = VehiculoId;
-			await Buscar();
-		}
+		ListaVehiculo = await httpClient.GetFromJsonAsync<List<Vehiculo>>("api/Vehiculoes");
+
 	}
 
 	private async Task<Vehiculo> BuscarVehiculo(int vehiculoId)
@@ -148,7 +147,15 @@
 		{
 			return;
 		}
-		vehiculo = new Vehiculo();
+
+		var vehiculoDevuelto = await response.Content.ReadFromJsonAsync<Vehiculo>();
+
+		if (vehiculoDevuelto is not null)
+		{
+			vehiculo = vehiculoDevuelto;
+			Nuevo();
+			StateHasChanged();
+		}
 	}
 
 	public async Task Buscar()
@@ -171,7 +178,7 @@
 		}
 	}
 
-	public async Task AddDetalle()
+	public async Task AgregarDetalle()
 	{
 		vehiculo.VehiculoDetalle.Add(Detalle);
 		Detalle = new VehiculoDetalle();
@@ -193,4 +200,9 @@
 		}
 	}
 
+	public void Nuevo()
+	{
+		vehiculo = new Vehiculo();
+		Detalle = new VehiculoDetalle();
+	}
 }
