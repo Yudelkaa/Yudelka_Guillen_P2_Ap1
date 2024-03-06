@@ -1,8 +1,9 @@
 ﻿@page "/Details"
+
 @using Shared.Models
 @inject HttpClient httpClient
 
-<PageTitle>Detalle de Vehiculos</PageTitle>
+<PageTitle>Dealer</PageTitle>
 <EditForm Model="vehiculo">
 	<div class="container">
 		<div class="card shadow-lg">
@@ -19,9 +20,13 @@
 						<th>Fecha</th>
 						<th>Costo</th>
 						<th>Gastos</th>
+						<th>Editar</th>
+						<th>Ver</th>
+						<th>Eliminar</th>
 
 					</tr>
 				</thead>
+
 				<tbody>
 					@foreach (var vehiculo in ListaVehiculo)
 					{
@@ -29,8 +34,13 @@
 							<td>@vehiculo.VehiculoId</td>
 							<td>@vehiculo.Descripcion</td>
 							<td>@vehiculo.Fecha</td>
-							<td>@vehiculo.Costo</td>
+							<td class="text-center">@vehiculo.Costo.ToString("N2")</td>
 							<td>@vehiculo.Gastos</td>
+							<td class="text-center">
+								<a href="Edit/@vehiculo.VehiculoId" class="btn btn-success bi bi-pencil" />
+							</td>
+							<td class="text-center"><a href="View/@vehiculo.VehiculoId" class="btn btn-primary bi bi-book"></a></td>
+							<td class="text-center"><a href="Delete/@vehiculo.VehiculoId" class="btn btn-danger bi bi-trash"></a></td>
 						</tr>
 					}
 				</tbody>

@@ -3,7 +3,7 @@
 @inject HttpClient httpClient
 
 
-<PageTitle>Registro Vehiculo</PageTitle>
+<PageTitle>Dealer</PageTitle>
 <EditForm Model="vehiculo" OnValidSubmit="Guardar" FormName="vehiculo">
 	<DataAnnotationsValidator />
 
@@ -20,8 +20,7 @@
 						<label class="fw-bold">Vehiculo ID:</label>
 						<div class="input-group mb-3">
 							<InputNumber @bind-Value="vehiculo.VehiculoId" class="form-control" aria-describedby="BotonBuscar" />
-							<button @onclick="Buscar" class="btn btn-primary bi bi-search-heart" type="button" id="BotonBuscar"></button>
-						</div>
+						</div> 
 						<div class="col-9">
 							<label class="form-label fw-bold" for="inputFecha">Fecha:</label>
 							<InputDate @bind-Value="vehiculo.Fecha" class="form-control" />
@@ -69,12 +68,13 @@
 
 							<label class="form-label fw-bold"> Valor:</label>
 							<InputNumber @bind-Value="Detalle.Valor" class="form-control"></InputNumber>
+							<button type="button" class="btn btn-success bi bi-plus-square-fill" @onclick="Agregar"> Agregar</button>
 							<ValidationMessage For="@(() => Detalle.Valor)" />
 						</div>
 					</div>
 
 					<div class="card-footer d-flex justify-content-center">
-						<button type="button" class="btn btn-success bi bi-plus-square-fill" @onclick="AgregarDetalle"> Agregar</button>
+						<a href="/Details" class="btn btn-primary bi bi-house-door-fill">Atrás</a>
 						<button type="submit" class="btn btn-primary bi bi-floppy">Guardar<i class="oi oi-document" /></button>
 					</div>
 					<table class='table table-sm justify-content-center'>
@@ -89,12 +89,14 @@
 						<tbody>
 							@foreach (var detalle in vehiculo.VehiculoDetalle)
 							{
-								var ticketEncontrado = BuscarVehiculo(detalle.VehiculoId);
+								var nom = ListaAccesorios.FirstOrDefault(a => a.AccesoriosId == detalle.AccesorioId);
 								<tr>
 									<td>@detalle.VehiculoId</td>
 									<td>@detalle.AccesorioId</td>
 									<td>@detalle.Valor</td>
-									<td><button type="button" class="btn btn-danger bi bi-trash" @onclick=@(() => RemoverDetalle(detalle))></button></td>
+									<td>@nom!.Descripcion</td>
+
+									<td><button type="button" class="btn btn-danger bi bi-trash-fill" @onclick=@(() => Borrar(detalle))></button></td>
 								</tr>
 							}
 						</tbody>
@@ -109,100 +111,84 @@
 
 @code {
 
-	[Parameter]
-	public int VehiculoId { get; set; }
-	public Vehiculo vehiculo { get; set; } = new Vehiculo();
-	public Accesorios accesorios { get; set; } = new Accesorios();
-	public VehiculoDetalle Detalle { get; set; } = new VehiculoDetalle();
-	public List<VehiculoDetalle> ListaDetalles = new List<VehiculoDetalle>();
-	public List<Accesorios> ListaAccesorios = new List<Accesorios>();
-	public List<Vehiculo> ListaVehiculo = new List<Vehiculo>();
 
-	public bool mensajeVacio;
-	public int resultado;
+	public Vehiculo vehiculo = new Vehiculo();
+	public List<Accesorios> ListaAccesorios { get; set; } = new List<Accesorios>();
+
+	public VehiculoDetalle Detalle { get; set; } = new VehiculoDetalle();
+
+	public string? mensaje { get; set; }
+	public int resultado { get; set; }
+	public int Opcion { get; set; }
 
 	protected override async Task OnInitializedAsync()
 	{
-		vehiculo.Fecha = DateTime.Now;
-
-		ListaAccesorios = await httpClient.GetFromJsonAsync<List<Accesorios>>("api/Accesorios");
-		ListaVehiculo = await httpClient.GetFromJsonAsync<List<Vehiculo>>("api/Vehiculoes");
-
+		ListaAccesorios = (await httpClient.GetFromJsonAsync<List<Accesorios>>("api/Accesorios"))!;
+		vehiculo.Fecha = DateTime.Today;
+		Nuevo();
 	}
 
-	private async Task<Vehiculo> BuscarVehiculo(int vehiculoId)
-	{
-		Vehiculo vehiculo = new Vehiculo();
-		var vehiculoEncontrado = await httpClient.GetFromJsonAsync<Vehiculo>($"api/Vehiculoes/{vehiculoId}");
-		if (vehiculoEncontrado != null)
-			return vehiculo = vehiculoEncontrado;
-		return new Vehiculo();
-	}
 
 	public async Task Guardar()
 	{
-		var response = await httpClient.PostAsJsonAsync("api/Vehiculoes", vehiculo);
+		var guardadoVehi = await httpClient.PostAsJsonAsync("api/Vehiculoes", vehiculo);
 
-		if (!response.IsSuccessStatusCode)
+		if (guardadoVehi.IsSuccessStatusCode)
 		{
-			return;
-		}
-
-		var vehiculoDevuelto = await response.Content.ReadFromJsonAsync<Vehiculo>();
-
-		if (vehiculoDevuelto is not null)
-		{
-			vehiculo = vehiculoDevuelto;
-			Nuevo();
-			StateHasChanged();
-		}
-	}
-
-	public async Task Buscar()
-	{
-		var vehiculoIdEncontrado = (await httpClient.GetFromJsonAsync<List<Vehiculo>>($"api/Vehiculoes"))!
-		.ToList()
-		.Any(v => v.VehiculoId == vehiculo.VehiculoId);
-		if (vehiculoIdEncontrado)
-		{
-			var vehiculoEncontrado = await httpClient.GetFromJsonAsync<Vehiculo>($"api/Vehiculoes/{vehiculo.VehiculoId}");
-			if (vehiculoEncontrado != null)
-			{
-				this.vehiculo = vehiculoEncontrado;
-				StateHasChanged();
-			}
+			resultado = 1;
+			mensaje = "Guardado";
+			vehiculo = new Vehiculo();
+			vehiculo.Fecha = DateTime.Today;
 		}
 		else
 		{
-			return;
+			resultado = 2;
+			mensaje = "No se pudo guardar";
 		}
 	}
 
-	public async Task AgregarDetalle()
+	public void Agregar()
 	{
-		vehiculo.VehiculoDetalle.Add(Detalle);
-		Detalle = new VehiculoDetalle();
-		StateHasChanged();
-	}
-
-
-	public async Task RemoverDetalle(VehiculoDetalle detalle)
-	{
-
-		var detalleEncontrado = vehiculo.VehiculoDetalle.FirstOrDefault(v => v.Id == detalle.Id);
-		if (detalleEncontrado != null)
+		if (Validar())
 		{
-			var ticket = BuscarVehiculo(detalleEncontrado.VehiculoId);
-			detalle = detalleEncontrado;
-			Detalle = detalleEncontrado;
-			vehiculo.VehiculoDetalle.Remove(detalle);
-			await httpClient.DeleteAsync($"api/Vehiculoes/{detalle.Id}");
+			resultado = 3;
+			mensaje = "ya existe";
 		}
+		else
+		{
+			if (Detalle.Valor > 0.01f && Detalle.Valor < 100000)
+			{
+
+				vehiculo.Gastos += Detalle.Valor;
+				vehiculo.VehiculoDetalle.Add(Detalle);
+				Detalle = new VehiculoDetalle();
+			}
+		}
+	}
+
+	public void Borrar(VehiculoDetalle details)
+	{
+		Detalle = details;
+		vehiculo.Gastos -= Detalle.Valor;
+		vehiculo.VehiculoDetalle.Remove(Detalle);
+	}
+
+	public void Mensaje()
+	{
+		resultado = 0;
+		mensaje = string.Empty;
 	}
 
 	public void Nuevo()
 	{
 		vehiculo = new Vehiculo();
-		Detalle = new VehiculoDetalle();
+		Mensaje();
+		vehiculo.Fecha = DateTime.Today;
+	}
+
+	public bool Validar()
+	{
+		return vehiculo.VehiculoDetalle.
+				Any(a => a.AccesorioId == Detalle.AccesorioId);
 	}
 }
