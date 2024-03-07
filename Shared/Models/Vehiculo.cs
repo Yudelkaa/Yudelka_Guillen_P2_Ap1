@@ -10,14 +10,16 @@ namespace Shared.Models
 {
 	public class Vehiculo
 	{
+		[Key]
 		public int VehiculoId { get; set; }
 		[Required(ErrorMessage = "Es requerido")]
 		public string? Descripcion { get; set; }
 		[Required(ErrorMessage = "Es requerido")]
 		public DateTime Fecha { get; set; } = DateTime.Now;
-		[Required(ErrorMessage = "Es requerido")]
+		
+		[Range(0.1, double.MaxValue, ErrorMessage = "Debe ser mayor a cero")]
 		public double Costo { get; set; }
-		[Required(ErrorMessage = "Es requerido")]
+		[Range(0.1, double.MaxValue, ErrorMessage = "Debe ser mayor a cero")]
 		public double Gastos { get; set; }
 
 		[ForeignKey("VehiculoId")]

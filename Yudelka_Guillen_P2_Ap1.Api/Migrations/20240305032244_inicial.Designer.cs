@@ -11,7 +11,7 @@ using Yudelka_Guillen_P2_Ap1.Api.DAL;
 namespace Yudelka_Guillen_P2_Ap1.Api.Migrations
 {
     [DbContext(typeof(Contexto))]
-    [Migration("20240305000507_inicial")]
+    [Migration("20240305032244_inicial")]
     partial class inicial
     {
         /// <inheritdoc />

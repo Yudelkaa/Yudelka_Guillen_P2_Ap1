@@ -3,7 +3,7 @@
 @inject HttpClient httpClient
 
 
-<PageTitle>Registro Vehiculo</PageTitle>
+<PageTitle>Dealer</PageTitle>
 <EditForm Model="vehiculo" OnValidSubmit="Guardar" FormName="vehiculo">
 	<DataAnnotationsValidator />
 
@@ -17,23 +17,21 @@
 
 				<div class="row">
 					<div class="col-4">
-						<label><strong>Vehiculo ID:</strong></label>
+						<label class="fw-bold">Vehiculo ID:</label>
 						<div class="input-group mb-3">
 							<InputNumber @bind-Value="vehiculo.VehiculoId" class="form-control" aria-describedby="BotonBuscar" />
-							<button @onclick="Buscar" class="btn btn-primary bi bi-search-heart" type="button" id="BotonBuscar"></button>
-						</div>
+						</div> 
 						<div class="col-9">
-							<label class="form-label" for="inputFecha"><strong>Fecha:</strong></label>
+							<label class="form-label fw-bold" for="inputFecha">Fecha:</label>
 							<InputDate @bind-Value="vehiculo.Fecha" class="form-control" />
 							<ValidationMessage For="@(() => vehiculo.Fecha)" />
 						</div>
 
 						<div>
-							<label class="form-label" for="Descripcion"><strong>Descripci&oacute;n</strong></label>
+							<label class="form-label fw-bold" for="Descripcion">Descripci&oacute;n</label>
 							<InputText @bind-Value="vehiculo.Descripcion" class="form-control" />
 							<ValidationMessage For="@(() => vehiculo.Descripcion)" />
 						</div>
-
 					</div>
 				</div>
 
@@ -43,147 +41,154 @@
 						<InputNumber @bind-Value="vehiculo.Costo" class="form-control"></InputNumber>
 						<ValidationMessage For="@(() => vehiculo.Costo)" />
 					</div>
-
 					<div class="col-3">
 						<label class="form-label fw-bold"> Gastos:</label>
-						<InputNumber @bind-Value="vehiculo.Gastos" class="form-control"></InputNumber>
-						<ValidationMessage For="@(() => vehiculo.Gastos)" />
+						<input class="form-control" readonly />
 					</div>
+
 				</div>
 				<br />
+
+
+				@*Vehiculo detalle*@
+				<fieldset class="border-primmary border border-2">
+
+					<div class="card-body col-3">
+						<h3 class="fw-bold">Detalle Vehiculo</h3>
+						<div>
+							<label class="form-label fw-bold">Accesorios Id:</label>
+							<InputSelect @bind-Value="Detalle.AccesorioId" class="form-select">
+								<option value="">Seleccione el accesorio</option>
+								@foreach (var detalle in ListaAccesorios)
+								{
+									<option value="@detalle.AccesoriosId">@detalle.Descripcion</option>
+								}
+							</InputSelect>
+							<ValidationMessage For="@(() => Detalle.AccesorioId)" />
+
+							<label class="form-label fw-bold"> Valor:</label>
+							<InputNumber @bind-Value="Detalle.Valor" class="form-control"></InputNumber>
+							<button type="button" class="btn btn-success bi bi-plus-square-fill" @onclick="Agregar"> Agregar</button>
+							<ValidationMessage For="@(() => Detalle.Valor)" />
+						</div>
+					</div>
+
+					<div class="card-footer d-flex justify-content-center">
+						<a href="/Details" class="btn btn-primary bi bi-house-door-fill">Atrás</a>
+						<button type="submit" class="btn btn-primary bi bi-floppy">Guardar<i class="oi oi-document" /></button>
+					</div>
+					<table class='table table-sm justify-content-center'>
+						<thead>
+							<tr>
+								<th>Vehiculo Id</th>
+								<th>Accesorios Id</th>
+								<th>Valor</th>
+								<th>Eliminar</th>
+							</tr>
+						</thead>
+						<tbody>
+							@foreach (var detalle in vehiculo.VehiculoDetalle)
+							{
+								var nom = ListaAccesorios.FirstOrDefault(a => a.AccesoriosId == detalle.AccesorioId);
+								<tr>
+									<td>@detalle.VehiculoId</td>
+									<td>@detalle.AccesorioId</td>
+									<td>@detalle.Valor</td>
+									<td>@nom!.Descripcion</td>
+
+									<td><button type="button" class="btn btn-danger bi bi-trash-fill" @onclick=@(() => Borrar(detalle))></button></td>
+								</tr>
+							}
+						</tbody>
+					</table>
+
+				</fieldset>
 			</div>
 		</div>
 	</div>
 
-	@*Vehiculo detalle*@
-	<div class="card shadow-lg">
-
-		<div class="card-header" style="color: white; background-color: royalblue;">
-			<h1 class="fw-bold">Detalle Vehiculo</h1>
-		</div>
-		<div class="card-body col-3">
-			<div>
-				<label class="form-label fw-bold">Accesorios Id:</label>
-				<InputNumber @bind-Value="Detalle.AccesorioId" class="form-control"></InputNumber>
-				<ValidationMessage For="@(() => Detalle.AccesorioId)" />
-			</div>
-			<div>
-				<label class="form-label fw-bold"> Valor:</label>
-				<InputNumber @bind-Value="Detalle.Valor" class="form-control"></InputNumber>
-				<ValidationMessage For="@(() => Detalle.Valor)" />
-			</div>
-		</div>
-		<div class="card-footer d-flex justify-content-center">
-			<button type="button" class="btn btn-success bi bi-plus-square-fill" @onclick="AddDetalle"> Agregar</button>
-			<button type="submit" class="btn btn-primary bi bi-floppy">Guardar<i class="oi oi-document" /></button>
-		</div>
-		<table class='table table-sm justify-content-center'>
-			<thead>
-				<tr>
-					<th>Vehiculo Id</th>
-					<th>Accesorios Id</th>
-					<th>Valor</th>
-					<th>Eliminar</th>
-				</tr>
-			</thead>
-			<tbody>
-				@foreach (var detalle in vehiculo.VehiculoDetalle)
-				{
-					var ticketEncontrado = BuscarVehiculo(detalle.VehiculoId);
-					<tr>
-						<td>@detalle.VehiculoId</td>
-						<td>@detalle.AccesorioId</td>
-						<td>@detalle.Valor</td>
-						<td><button type="button" class="btn btn-danger bi bi-trash" @onclick=@(() => RemoverDetalle(detalle))></button></td>
-					</tr>
-				}
-			</tbody>
-		</table>
-	</div>
-	</div>
 </EditForm>
 
 @code {
 
-	[Parameter]
-	public int VehiculoId { get; set; }
-	List<Vehiculo> listaSolicitado = new List<Vehiculo>();
-	public List<VehiculoDetalle> ListaDetalles = new List<VehiculoDetalle>();
-	public Vehiculo vehiculo { get; set; } = new Vehiculo();
+
+	public Vehiculo vehiculo = new Vehiculo();
+	public List<Accesorios> ListaAccesorios { get; set; } = new List<Accesorios>();
+
 	public VehiculoDetalle Detalle { get; set; } = new VehiculoDetalle();
 
-	public bool mensajeVacio;
-	public int resultado;
-	public bool emisorVacio;
+	public string? mensaje { get; set; }
+	public int resultado { get; set; }
+	public int Opcion { get; set; }
 
 	protected override async Task OnInitializedAsync()
 	{
-		if (VehiculoId > 0)
-		{
-			this.vehiculo.VehiculoId = VehiculoId;
-			await Buscar();
-		}
+		ListaAccesorios = (await httpClient.GetFromJsonAsync<List<Accesorios>>("api/Accesorios"))!;
+		vehiculo.Fecha = DateTime.Today;
+		Nuevo();
 	}
 
-	private async Task<Vehiculo> BuscarVehiculo(int vehiculoId)
-	{
-		Vehiculo vehiculo = new Vehiculo();
-		var vehiculoEncontrado = await httpClient.GetFromJsonAsync<Vehiculo>($"api/Vehiculo/{vehiculoId}");
-		if (vehiculoEncontrado != null)
-			return vehiculo = vehiculoEncontrado;
-		return new Vehiculo();
-	}
 
 	public async Task Guardar()
 	{
-		var response = await httpClient.PostAsJsonAsync("api/Vehiculo", vehiculo);
+		var guardadoVehi = await httpClient.PostAsJsonAsync("api/Vehiculoes", vehiculo);
 
-		if (!response.IsSuccessStatusCode)
+		if (guardadoVehi.IsSuccessStatusCode)
 		{
-			return;
-		}
-		vehiculo = new Vehiculo();
-	}
-
-	public async Task Buscar()
-	{
-		var vehiculoIdEncontrado = (await httpClient.GetFromJsonAsync<List<Vehiculo>>($"api/Vehiculo"))!
-		.ToList()
-		.Any(v => v.VehiculoId == vehiculo.VehiculoId);
-		if (vehiculoIdEncontrado)
-		{
-			var vehiculoEncontrado = await httpClient.GetFromJsonAsync<Vehiculo>($"api/Vehiculo/{vehiculo.VehiculoId}");
-			if (vehiculoEncontrado != null)
-			{
-				this.vehiculo = vehiculoEncontrado;
-				StateHasChanged();
-			}
+			resultado = 1;
+			mensaje = "Guardado";
+			vehiculo = new Vehiculo();
+			vehiculo.Fecha = DateTime.Today;
 		}
 		else
 		{
-			return;
+			resultado = 2;
+			mensaje = "No se pudo guardar";
 		}
 	}
 
-	public async Task AddDetalle()
+	public void Agregar()
 	{
-		vehiculo.VehiculoDetalle.Add(Detalle);
-		Detalle = new VehiculoDetalle();
-	}
-
-
-	public async Task RemoverDetalle(VehiculoDetalle detalle)
-	{
-
-		var detalleEncontrado = vehiculo.VehiculoDetalle.FirstOrDefault(v => v.Id == detalle.Id);
-		if (detalleEncontrado != null)
+		if (Validar())
 		{
-			var ticket = BuscarVehiculo(detalleEncontrado.VehiculoId);
-			detalle = detalleEncontrado;
-			Detalle = detalleEncontrado;
-			vehiculo.VehiculoDetalle.Remove(detalle);
-			await httpClient.DeleteAsync($"api/Tickets/DeleteTicketsMessages/{detalle.Id}");
+			resultado = 3;
+			mensaje = "ya existe";
+		}
+		else
+		{
+			if (Detalle.Valor > 0.01f && Detalle.Valor < 100000)
+			{
+
+				vehiculo.Gastos += Detalle.Valor;
+				vehiculo.VehiculoDetalle.Add(Detalle);
+				Detalle = new VehiculoDetalle();
+			}
 		}
 	}
 
+	public void Borrar(VehiculoDetalle details)
+	{
+		Detalle = details;
+		vehiculo.Gastos -= Detalle.Valor;
+		vehiculo.VehiculoDetalle.Remove(Detalle);
+	}
+
+	public void Mensaje()
+	{
+		resultado = 0;
+		mensaje = string.Empty;
+	}
+
+	public void Nuevo()
+	{
+		vehiculo = new Vehiculo();
+		Mensaje();
+		vehiculo.Fecha = DateTime.Today;
+	}
+
+	public bool Validar()
+	{
+		return vehiculo.VehiculoDetalle.
+				Any(a => a.AccesorioId == Detalle.AccesorioId);
+	}
 }

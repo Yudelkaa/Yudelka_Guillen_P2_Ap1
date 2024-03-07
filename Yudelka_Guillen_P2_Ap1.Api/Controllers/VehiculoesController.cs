@@ -20,13 +20,13 @@ namespace Yudelka_Guillen_P2_Ap1.Api.Controllers
         {
             _context = context;
         }
-        [HttpGet]
 
+        [HttpGet]
         // GET: api/Vehiculoes
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Vehiculo>>> GetVehiculo()
         {
-            return await _context.Vehiculo.Include(op => op.VehiculoId).ToListAsync();
+            return await _context.Vehiculo.Include(op => op.VehiculoDetalle).ToListAsync();
         }
 
         // GET: api/Vehiculoes/5
@@ -80,13 +80,11 @@ namespace Yudelka_Guillen_P2_Ap1.Api.Controllers
         [HttpPost]
         public async Task<ActionResult<Vehiculo>> PostVehiculo(Vehiculo vehiculo)
         {
-            if (!VehiculoExists(vehiculo.VehiculoId))
-                _context.Vehiculo.Add(vehiculo);
-            else
-                _context.Vehiculo.Update(vehiculo);
-            await _context.SaveChangesAsync();
-            return Ok(vehiculo);
-        }
+			_context.Vehiculo.Add(vehiculo);
+			await _context.SaveChangesAsync();
+
+			return CreatedAtAction("GetVehiculos", new { id = vehiculo.VehiculoId }, vehiculo);
+		}
 
         // DELETE: api/Vehiculoes/5
         [HttpDelete("{id}")]
@@ -110,6 +108,5 @@ namespace Yudelka_Guillen_P2_Ap1.Api.Controllers
         }
 
     }
-
 }
 
